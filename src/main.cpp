@@ -5,20 +5,31 @@
 #include <Eigen/src/Core/Matrix.h>
 #include <Eigen/src/Core/MatrixBase.h>
 
+#define ARGV_COUNT 2
+
 Eigen::MatrixXd Vs, Ns;
 Eigen::MatrixXi Fs;
 
 int main(int argc, char *argv[])
 {
+
+  if (argc != ARGV_COUNT)
+  {
+    std::cout << "Useage: ./example <path_to_stl>" << std::endl;
+    return 1;
+  }
+
+  const std::string filePath = std::string(argv[1]);
+
   // load a mesh
-  std::ifstream fileStream ("/home/magshimim/CellStudio_Work/libigl_tutorial/libigl-example-project/Microatlas_real_dim.stl");
+  std::ifstream fileStream (filePath);
   igl::readSTL(fileStream, Vs, Fs, Ns);
 
   //Load a mesh in OFF format
   //Vs, Fs = igl::read_triangle_mesh("/home/magshimim/CellStudio_Work/libigl_tutorial/libigl-example-project/Microatlas_real_dim.stl");
   
   std::string dir,_1,_2,name;
-  igl::read_triangle_mesh("/home/magshimim/CellStudio_Work/libigl_tutorial/libigl-example-project/Microatlas_real_dim.stl" ,Vs ,Fs,dir,_1,_2,name);
+  igl::read_triangle_mesh(filePath ,Vs ,Fs,dir,_1,_2,name);
 
   std::cout << "DIR:" << dir << std::endl;
   std::cout << "_1:" << _1 << std::endl;
