@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   std::cout << "name:" << name << std::endl;
 
   Eigen::MatrixBase< Eigen::Matrix<int, 1, 1 ,1> > *source;
-  Eigen::MatrixBase< Eigen::Matrix<int, 1, 1 ,1> > *dir;
+  //Eigen::MatrixBase< Eigen::Matrix<int, 1, 1 ,1> > *dir;
   
 
   /*## Print the vertices and faces matrices 
