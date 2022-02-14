@@ -8,6 +8,6 @@ option(LIBIGL_GLFW "Build target igl::glfw" ON)
 include(libigl)
 
 # Add your project files
-file(GLOB SRC_FILES *.cpp)
+file(GLOB SRC_FILES src/*.cpp src/*.h)
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC igl::glfw)
