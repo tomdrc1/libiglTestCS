@@ -4,79 +4,71 @@
 #include <igl/ray_mesh_intersect.h>
 #include <Eigen/src/Core/Matrix.h>
 #include <Eigen/src/Core/MatrixBase.h>
+#include <Eigen/Dense>
+#include <igl/readMESH.h>
+#include <igl/raytri.c>
+
+#include "cube.h"
 
 #define ARGV_COUNT 2
 
-Eigen::MatrixXd Vs, Ns;
-Eigen::MatrixXi Fs;
-
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
 
-  if (argc != ARGV_COUNT)
-  {
-    std::cout << "Useage: ./example <path_to_stl>" << std::endl;
-    return 1;
-  }
+    if (argc != ARGV_COUNT)
+    {
+        std::cout << "Useage: ./example <path_to_stl>" << std::endl;
+        return 1;
+    }
 
-  const std::string filePath = std::string(argv[1]);
+    const std::string filePath = std::string(argv[1]);
 
-  // load a mesh
-  std::ifstream fileStream (filePath);
-  igl::readSTL(fileStream, Vs, Fs, Ns);
+    /*
+        VSource - list of mesh vertex positions
+        FSource - list of mesh indices into Vs (Ele)
+    */
+    Eigen::MatrixXd VSource, NSource;
+    Eigen::MatrixXi FSource;
 
-  //Load a mesh in OFF format
-  //Vs, Fs = igl::read_triangle_mesh("/home/magshimim/CellStudio_Work/libigl_tutorial/libigl-example-project/Microatlas_real_dim.stl");
-  
-  std::string dir,_1,_2,name;
-  igl::read_triangle_mesh(filePath ,Vs ,Fs,dir,_1,_2,name);
+    // load a mesh
+    std::ifstream fileStream (filePath);
+    igl::readSTL(fileStream, VSource, FSource, NSource);
 
-  std::cout << "DIR:" << dir << std::endl;
-  std::cout << "_1:" << _1 << std::endl;
-  std::cout << "_2:" << _2 << std::endl;
-  std::cout << "name:" << name << std::endl;
+    // build the AABB tree for the mesh
+    ///igl::AABB<Eigen::MatrixXd, 3> tree;
 
-  Eigen::MatrixBase< Eigen::Matrix<int, 1, 1 ,1> > *source;
-  //Eigen::MatrixBase< Eigen::Matrix<int, 1, 1 ,1> > *dir;
-  
+    // Size of the "ray"
+    Eigen::Vector3d source(0,0,0);
+    Eigen::Vector3d end(200,200,200);
+    Eigen::Vector3d dir = end - source;
+    igl::Hit h;
 
-  /*## Print the vertices and faces matrices 
-  print("Vertices: ", len(v))
-  print("Faces: ", len(f))*/
+    bool ans = igl::ray_mesh_intersect(source, dir, V, F, h);
+    std::cout << "source: " << source << std::endl;
+    std::cout << "end: " << end << std::endl;
+    std::cout << "dir: " << dir << std::endl;
+    std::cout << "h.id: " << h.id << std::endl; 
+    std::cout << "h.gid: " << h.gid << std::endl;
 
-  // Plot the mesh
-  igl::opengl::glfw::Viewer viewer;
-  viewer.data().set_mesh(Vs, Fs);
-  viewer.data().set_face_based(true);
-  viewer.launch();
+    // barycentric coordinates
+    std::cout << "h.u: " << h.u << std::endl;
+    std::cout << "h.v: " << h.v << std::endl;
 
-  /*// Inline mesh of a cube
-  const Eigen::MatrixXd V= (Eigen::MatrixXd(8,3)<<
-    0.0,0.0,0.0,
-    0.0,0.0,1.0,
-    0.0,1.0,0.0,
-    0.0,1.0,1.0,
-    1.0,0.0,0.0,
-    1.0,0.0,1.0,
-    1.0,1.0,0.0,
-    1.0,1.0,1.0).finished();
-  const Eigen::MatrixXi F = (Eigen::MatrixXi(12,3)<<
-    1,7,5,
-    1,3,7,
-    1,4,3,
-    1,2,4,
-    3,8,7,
-    3,4,8,
-    5,7,8,
-    5,8,6,
-    1,5,6,
-    1,6,2,
-    2,6,8,
-    2,8,4).finished().array()-1;
+    std::cout << "h.t: " << h.t << std::endl;
 
-  // Plot the mesh
-  igl::opengl::glfw::Viewer viewer;
-  viewer.data().set_mesh(V, F);
-  viewer.data().set_face_based(true);
-  viewer.launch();*/
+    if (ans == true)
+    {
+        std::cout << "hit!" << std::endl;
+    }
+    else
+    {
+        std::cout << "no hit" << std::endl;
+    }
+
+    // Plot the mesh
+    igl::opengl::glfw::Viewer viewer;
+    viewer.data().set_mesh(V, F);
+    viewer.data().set_face_based(true);
+    viewer.launch();
+
 }
