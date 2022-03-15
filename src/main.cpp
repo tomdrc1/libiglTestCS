@@ -39,11 +39,13 @@ int main(int argc, char** argv)
 
     // Size of the "ray"
     Eigen::Vector3d source(0,0,0);
-    Eigen::Vector3d end(200,200,200);
+    Eigen::Vector3d end(5000,5000,5000);
     Eigen::Vector3d dir = end - source;
     igl::Hit h;
 
-    bool ans = igl::ray_mesh_intersect(source, dir, V, F, h);
+    bool ans = igl::ray_mesh_intersect(source, dir, VSource, FSource, h);
+    Eigen::MatrixXd C = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
+
     std::cout << "source: " << source << std::endl;
     std::cout << "end: " << end << std::endl;
     std::cout << "dir: " << dir << std::endl;
@@ -65,9 +67,12 @@ int main(int argc, char** argv)
         std::cout << "no hit" << std::endl;
     }
 
+    C.row(h.id) << 1,0,0;
+    
     // Plot the mesh
     igl::opengl::glfw::Viewer viewer;
-    viewer.data().set_mesh(V, F);
+    viewer.data().set_mesh(VSource, FSource);
+    viewer.data().set_colors(C);
     viewer.data().set_face_based(true);
     viewer.launch();
 
