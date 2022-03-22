@@ -12,6 +12,8 @@
 
 #define ARGV_COUNT 2
 
+void printPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource);
+
 int main(int argc, char** argv)
 {
 
@@ -27,24 +29,26 @@ int main(int argc, char** argv)
         VSource - list of mesh vertex positions
         FSource - list of mesh indices into Vs (Ele)
     */
-    Eigen::MatrixXd VSource, NSource;
-    Eigen::MatrixXi FSource;
+    //Eigen::MatrixXd VSource;
+    Eigen::MatrixXd NSource;
+    //Eigen::MatrixXi FSource;
 
     // load a mesh
     std::ifstream fileStream (filePath);
-    igl::readSTL(fileStream, VSource, FSource, NSource);
+    //igl::readSTL(fileStream, VSource, FSource, NSource);
 
     // build the AABB tree for the mesh
     ///igl::AABB<Eigen::MatrixXd, 3> tree;
 
     // Size of the "ray"
-    Eigen::Vector3d source(0,0,0);
-    Eigen::Vector3d end(5000,5000,5000);
+    Eigen::Vector3d source(0.3, 0, 0.5);
+    Eigen::Vector3d end(0.4, 0.5, 0.7);
     Eigen::Vector3d dir = end - source;
     igl::Hit h;
 
     bool ans = igl::ray_mesh_intersect(source, dir, VSource, FSource, h);
     Eigen::MatrixXd C = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
+    
 
     std::cout << "source: " << source << std::endl;
     std::cout << "end: " << end << std::endl;
@@ -58,16 +62,18 @@ int main(int argc, char** argv)
 
     std::cout << "h.t: " << h.t << std::endl;
 
+    std::cout << "XYZ Pos in texture: ";
+    printPositionInTexture(h, VSource, FSource);
+
     if (ans == true)
     {
         std::cout << "hit!" << std::endl;
+        C.row(h.id) << 1,0,0;
     }
     else
     {
         std::cout << "no hit" << std::endl;
     }
-
-    C.row(h.id) << 1,0,0;
     
     // Plot the mesh
     igl::opengl::glfw::Viewer viewer;
@@ -76,4 +82,9 @@ int main(int argc, char** argv)
     viewer.data().set_face_based(true);
     viewer.launch();
 
+}
+
+void printPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource)
+{
+    std::cout << VSource.row(FSource(hit.id, 0)) * (1 - hit.u - hit.v) + VSource.row(FSource(hit.id, 1)) * hit.u + VSource.row(FSource(hit.id, 2)) * hit.v << std::endl;
 }

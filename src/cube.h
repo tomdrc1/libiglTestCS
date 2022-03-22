@@ -1,8 +1,11 @@
 #pragma once
 
+#define USE_CUBE
+
+#ifdef USE_CUBE
 #include <igl/opengl/glfw/Viewer.h>
 
-const Eigen::MatrixXd V= (Eigen::MatrixXd(8,3)<<
+const Eigen::MatrixXd VSource = (Eigen::MatrixXd(8,3)<<
     0.0,0.0,0.0,
     0.0,0.0,1.0,
     0.0,1.0,0.0,
@@ -12,7 +15,7 @@ const Eigen::MatrixXd V= (Eigen::MatrixXd(8,3)<<
     1.0,1.0,0.0,
     1.0,1.0,1.0).finished();
 
-const Eigen::MatrixXi F = (Eigen::MatrixXi(12,3)<<
+const Eigen::MatrixXi FSource = (Eigen::MatrixXi(12,3)<<
     1,7,5,
     1,3,7,
     1,4,3,
@@ -25,3 +28,5 @@ const Eigen::MatrixXi F = (Eigen::MatrixXi(12,3)<<
     1,6,2,
     2,6,8,
     2,8,4).finished().array()-1;
+
+#endif
