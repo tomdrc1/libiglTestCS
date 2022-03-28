@@ -29,16 +29,16 @@ int main(int argc, char** argv)
         VSource - list of mesh vertex positions
         FSource - list of mesh indices into Vs (Ele)
     */
-    //Eigen::MatrixXd VSource;
     Eigen::MatrixXd NSource;
-    //Eigen::MatrixXi FSource;
+
+    #ifndef USE_CUBE
+    Eigen::MatrixXd VSource;
+    Eigen::MatrixXi FSource;
 
     // load a mesh
     std::ifstream fileStream (filePath);
-    //igl::readSTL(fileStream, VSource, FSource, NSource);
-
-    // build the AABB tree for the mesh
-    ///igl::AABB<Eigen::MatrixXd, 3> tree;
+    igl::readSTL(fileStream, VSource, FSource, NSource);
+    #endif
 
     // Size of the "ray"
     Eigen::Vector3d source(0.3, 0, 0.5);
