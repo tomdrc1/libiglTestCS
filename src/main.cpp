@@ -12,7 +12,15 @@
 
 #define ARGV_COUNT 2
 
+Eigen::MatrixXd C;
+Eigen::MatrixXd P;
+
+float a,b,c;
+float x,y,z;
+
 Eigen::MatrixXd getPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource);
+bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier);
+void generateHit(Eigen::Vector3d source, Eigen::Vector3d end);
 
 int main(int argc, char** argv)
 {
@@ -40,15 +48,70 @@ int main(int argc, char** argv)
     igl::readSTL(fileStream, VSource, FSource, NSource);
     #endif
 
+    a = 0;
+    b = 0;
+    c = 0;
+
+    x = 0.5;
+    y = 0.5;
+    z = 0.5;
     // Size of the "ray"
     Eigen::Vector3d source(0.3, 0, 0.5);
     Eigen::Vector3d end(0.4, 0.6, -1);
+
+    generateHit(source, end);
+
+    // Plot the mesh
+    igl::opengl::glfw::Viewer viewer;
+    viewer.callback_key_down = &key_down;
+    viewer.data().set_mesh(VSource, FSource);
+    viewer.data().set_colors(C);
+    viewer.data().add_points(P,Eigen::RowVector3d(0,0,255));
+    viewer.data().set_face_based(true);
+    viewer.launch();
+
+}
+
+Eigen::MatrixXd getPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource)
+{
+    return VSource.row(FSource(hit.id, 0)) * (1 - hit.u - hit.v) + VSource.row(FSource(hit.id, 1)) * hit.u + VSource.row(FSource(hit.id, 2)) * hit.v;
+}
+
+bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier)
+{
+    std::cout << "Clicked!: " << key << " Modifier: " << modifier << std::endl;
+    if (key == 'X')
+    {
+        Eigen::Vector3d source(a, b, c);
+        Eigen::Vector3d end(x, y, z);
+
+        generateHit(source, end);
+        viewer.data().clear();
+        viewer.data().set_mesh(VSource, FSource);
+        viewer.data().set_colors(C);
+        viewer.data().add_points(P,Eigen::RowVector3d(0,0,255));
+        viewer.data().set_face_based(true);
+
+        a += 0.1;
+        b += 0.2;
+        c += 0.3;
+
+        x += 0.1;
+        y += 0.2;
+        z += 0.3;
+    }
+
+    return false;
+}
+
+void generateHit(Eigen::Vector3d source, Eigen::Vector3d end)
+{
     Eigen::Vector3d dir = end - source;
     igl::Hit h;
 
     bool ans = igl::ray_mesh_intersect(source, dir, VSource, FSource, h);
-    Eigen::MatrixXd C = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
-    Eigen::MatrixXd P = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
+    C = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
+    P = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
     
 
     std::cout << "source: " << source << std::endl;
@@ -76,18 +139,4 @@ int main(int argc, char** argv)
     {
         std::cout << "no hit" << std::endl;
     }
-    
-    // Plot the mesh
-    igl::opengl::glfw::Viewer viewer;
-    viewer.data().set_mesh(VSource, FSource);
-    viewer.data().set_colors(C);
-    viewer.data().add_points(P,Eigen::RowVector3d(0,0,255));
-    viewer.data().set_face_based(true);
-    viewer.launch();
-
-}
-
-Eigen::MatrixXd getPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource)
-{
-    return VSource.row(FSource(hit.id, 0)) * (1 - hit.u - hit.v) + VSource.row(FSource(hit.id, 1)) * hit.u + VSource.row(FSource(hit.id, 2)) * hit.v;
 }
