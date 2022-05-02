@@ -14,10 +14,11 @@
 
 Eigen::MatrixXd C;
 Eigen::MatrixXd P;
+Eigen::MatrixXd V;
+Eigen::MatrixXi F;
 
 float a,b,c;
 float x,y,z;
-
 Eigen::MatrixXd getPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource);
 bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier);
 void generateHit(Eigen::Vector3d source, Eigen::Vector3d end);
@@ -48,6 +49,9 @@ int main(int argc, char** argv)
     igl::readSTL(fileStream, VSource, FSource, NSource);
     #endif
 
+    V = VSource;
+    F = FSource;
+
     a = 0;
     b = 0;
     c = 0;
@@ -72,9 +76,9 @@ int main(int argc, char** argv)
 
 }
 
-Eigen::MatrixXd getPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource, const Eigen::MatrixXi& FSource)
+Eigen::MatrixXd getPositionInTexture(const igl::Hit& hit, const Eigen::MatrixXd& VSource_m, const Eigen::MatrixXi& FSource_m)
 {
-    return VSource.row(FSource(hit.id, 0)) * (1 - hit.u - hit.v) + VSource.row(FSource(hit.id, 1)) * hit.u + VSource.row(FSource(hit.id, 2)) * hit.v;
+    return VSource_m.row(FSource_m(hit.id, 0)) * (1 - hit.u - hit.v) + VSource_m.row(FSource_m(hit.id, 1)) * hit.u + VSource_m.row(FSource_m(hit.id, 2)) * hit.v;
 }
 
 bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier)
@@ -87,7 +91,7 @@ bool key_down(igl::opengl::glfw::Viewer& viewer, unsigned char key, int modifier
 
         generateHit(source, end);
         viewer.data().clear();
-        viewer.data().set_mesh(VSource, FSource);
+        viewer.data().set_mesh(V, F);
         viewer.data().set_colors(C);
         viewer.data().add_points(P,Eigen::RowVector3d(0,0,255));
         viewer.data().set_face_based(true);
@@ -109,9 +113,9 @@ void generateHit(Eigen::Vector3d source, Eigen::Vector3d end)
     Eigen::Vector3d dir = end - source;
     igl::Hit h;
 
-    bool ans = igl::ray_mesh_intersect(source, dir, VSource, FSource, h);
-    C = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
-    P = Eigen::MatrixXd::Constant(FSource.rows(), FSource.cols(), 1);
+    bool ans = igl::ray_mesh_intersect(source, dir, V, F, h);
+    C = Eigen::MatrixXd::Constant(F.rows(), F.cols(), 1);
+    P = Eigen::MatrixXd::Constant(F.rows(), F.cols(), 1);
     
 
     std::cout << "source: " << source << std::endl;
@@ -127,13 +131,13 @@ void generateHit(Eigen::Vector3d source, Eigen::Vector3d end)
     std::cout << "h.t: " << h.t << std::endl;
 
     std::cout << "XYZ Pos in texture: ";
-    std::cout << getPositionInTexture(h, VSource, FSource) << std::endl;
+    std::cout << getPositionInTexture(h, V, F) << std::endl;
 
     if (ans == true)
     {
         std::cout << "hit!" << std::endl;
         C.row(h.id) << 1,0,0;
-        P.row(h.id) << getPositionInTexture(h, VSource, FSource);
+        P.row(h.id) << getPositionInTexture(h, V, F);
     }
     else
     {

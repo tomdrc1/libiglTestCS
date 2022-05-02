@@ -1,6 +1,6 @@
 #pragma once
 
-#define USE_CUBE
+//#define USE_CUBE
 
 #ifdef USE_CUBE
 #include <igl/opengl/glfw/Viewer.h>
