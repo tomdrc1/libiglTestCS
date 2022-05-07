@@ -113,10 +113,16 @@ void generateHit(Eigen::Vector3d source, Eigen::Vector3d end)
     Eigen::Vector3d dir = end - source;
     igl::Hit h;
 
-    bool ans = igl::ray_mesh_intersect(source, dir, V, F, h);
+    bool isHit = igl::ray_mesh_intersect(source, dir, V, F, h);
+
     C = Eigen::MatrixXd::Constant(F.rows(), F.cols(), 1);
     P = Eigen::MatrixXd::Constant(F.rows(), F.cols(), 1);
     
+    if (!isHit)
+    {
+        std::cout << "No hit!" << std::endl;
+        return;
+    }
 
     std::cout << "source: " << source << std::endl;
     std::cout << "end: " << end << std::endl;
@@ -133,14 +139,7 @@ void generateHit(Eigen::Vector3d source, Eigen::Vector3d end)
     std::cout << "XYZ Pos in texture: ";
     std::cout << getPositionInTexture(h, V, F) << std::endl;
 
-    if (ans == true)
-    {
-        std::cout << "hit!" << std::endl;
-        C.row(h.id) << 1,0,0;
-        P.row(h.id) << getPositionInTexture(h, V, F);
-    }
-    else
-    {
-        std::cout << "no hit" << std::endl;
-    }
+    std::cout << "hit!" << std::endl;
+    C.row(h.id) << 1,0,0;
+    P.row(h.id) << getPositionInTexture(h, V, F);
 }
